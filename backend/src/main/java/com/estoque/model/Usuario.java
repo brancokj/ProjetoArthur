@@ -9,111 +9,81 @@ import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
-public class Usuario implements UserDetails { // <--- ISSO É OBRIGATÓRIO
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // BLINDAGEM 1: E-mail único e obrigatório
+    @Column(nullable = false, unique = true)
     private String email;
+
+    // BLINDAGEM 2: Senha obrigatória
+    @Column(nullable = false)
     private String senha;
+
+    // BLINDAGEM 3: CPF único (se preenchido)
+    @Column(unique = true)
     private String cpf;
+
+    // BLINDAGEM 4: CNPJ único (se preenchido)
+    @Column(unique = true)
     private String cnpj;
-    private Boolean admin;
 
-    public Usuario() {
-    }
+    private Boolean admin; // true = ADMIN, false = CLIENTE
 
-    // --- MÉTODOS DE SEGURANÇA (O Spring exige isso) ---
+    public Usuario() {}
+
+    // --- MÉTODOS DE SEGURANÇA (Spring Security) ---
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.admin != null && this.admin) {
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+        } else {
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
-    public String getPassword() {
-        return senha;
-    }
+    public String getPassword() { return senha; }
 
     @Override
-    public String getUsername() {
-        return email;
-    }
+    public String getUsername() { return email; }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 
+    // Helper para facilitar verificação de admin
     public boolean isAdmin() {
         return admin != null && admin;
     }
 
-    // --- GETTERS E SETTERS NORMAIS ---
-    public Long getId() {
-        return id;
-    }
+    // --- GETTERS E SETTERS ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getCpf() { return cpf; }
+    public void setCpf(String cpf) { this.cpf = cpf; }
 
-    public String getSenha() {
-        return senha;
-    }
+    public String getCnpj() { return cnpj; }
+    public void setCnpj(String cnpj) { this.cnpj = cnpj; }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
-
-    public Boolean getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(Boolean admin) {
-        this.admin = admin;
-    }
-
+    public Boolean getAdmin() { return admin; }
+    public void setAdmin(Boolean admin) { this.admin = admin; }
 }
