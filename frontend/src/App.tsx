@@ -4,6 +4,7 @@ import Produtos from './pages/Produtos';
 import Perfil from './pages/Perfil'; 
 import AdminDashboard from './pages/AdminDashboard'; 
 import Register from './pages/Register';
+import Checkout from './pages/Checkout'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/perfil" element={<Perfil />} /> 
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/checkout" element={<Checkout />}/>
         
       </Routes>
     </BrowserRouter>

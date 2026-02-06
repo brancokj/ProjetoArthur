@@ -1,19 +1,20 @@
 package com.estoque.dto;
 
-import com.estoque.model.Venda;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public record VendaDTO(Long id, LocalDateTime data, Double total, String vendedor, List<ItemVendaDTO> itens) {
+public class VendaDTO {
+    // Lista de IDs dos produtos comprados (simplificado)
+    private List<ItemVendaDTO> itens; 
     
-    public VendaDTO(Venda venda) {
-        this(
-            venda.getId(),
-            venda.getDataVenda(),
-            venda.getValorTotal(),
-            venda.getUsuario().getEmail(), 
-            venda.getItens().stream().map(ItemVendaDTO::new).collect(Collectors.toList())
-        );
-    }
+    private String vendedor;
+    private String tipoAtendimento; // O front vai mandar "LOJA" ou "DOMICILIO"
+
+    public String getVendedor() { return vendedor; }
+    public void setVendedor(String vendedor) { this.vendedor = vendedor; }
+
+    public String getTipoAtendimento() { return tipoAtendimento; }
+    public void setTipoAtendimento(String tipoAtendimento) { this.tipoAtendimento = tipoAtendimento; }
+
+    public List<ItemVendaDTO> getItens() { return itens; }
+    public void setItens(List<ItemVendaDTO> itens) { this.itens = itens; }
 }

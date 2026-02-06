@@ -12,10 +12,10 @@ interface Produto {
 }
 
 function Produtos() {
-    // --- 1. HOOKS (Sempre DENTRO da função) ---
+    // --- 1. HOOKS ---
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [busca, setBusca] = useState('');
-    const [isAdmin, setIsAdmin] = useState(false); // <--- O NOVO ESTADO AQUI
+    const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
 
     // Estados do Modal
@@ -23,7 +23,11 @@ function Produtos() {
     const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
     const [qtdCompra, setQtdCompra] = useState(1);
 
-    // --- 2. EFEITOS (Carregar dados ao abrir) ---
+    // --- NOVOS ESTADOS PARA A VENDA ---
+    const [vendedor, setVendedor] = useState(''); // <--- NOVO
+    const [tipoAtendimento, setTipoAtendimento] = useState('NA_LOJA'); // <--- NOVO (Padrão: Na Loja)
+
+    // --- 2. EFEITOS ---
     useEffect(() => {
         carregarDados();
     }, [navigate]);
@@ -37,7 +41,6 @@ function Produtos() {
 
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // Busca Produtos
         axios.get('http://localhost:8080/api/produtos', { headers })
         .then(response => {
             const dados = response.data.content ? response.data.content : response.data;
@@ -45,7 +48,6 @@ function Produtos() {
         })
         .catch(() => navigate('/'));
 
-        // Busca Dados do Usuário (Para saber se é Admin)
         axios.get('http://localhost:8080/api/usuarios/me', { headers })
         .then(response => {
             setIsAdmin(response.data.admin);
@@ -64,6 +66,9 @@ function Produtos() {
     const abrirModal = (p: Produto) => {
         setProdutoSelecionado(p);
         setQtdCompra(1);
+        // Resetar os campos ao abrir o modal
+        setVendedor(''); 
+        setTipoAtendimento('NA_LOJA'); 
         setShowModal(true);
     };
 
@@ -72,16 +77,21 @@ function Produtos() {
         try {
             const token = localStorage.getItem('token');
             
+            // PAYLOAD ATUALIZADO COM OS NOVOS CAMPOS
             const vendaPayload = {
-                itens: [
+                vendedor: vendedor, // <--- ENVIA O VENDEDOR
+                tipoAtendimento: tipoAtendimento, // <--- ENVIA O TIPO
+                itens: [ // (Nota: Se seu back espera "produtosIds" simples, ajuste aqui. Se espera itens complexos, mantenha assim)
                     { 
                         idProduto: produtoSelecionado.id, 
                         quantidade: qtdCompra 
                     }
-                ]
+                ],
+                // Caso seu backend antigo espere apenas uma lista de IDs simples, use:
+                // produtosIds: [produtoSelecionado.id] 
             };
 
-            await axios.post('http://localhost:8080/api/vendas', vendaPayload, {
+            await axios.post('http://localhost:8080/api/vendas/finalizar', vendaPayload, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -97,45 +107,26 @@ function Produtos() {
     // --- 4. O VISUAL (JSX) ---
     return (
         <div style={{ minHeight: '100vh', background: '#f0f2f5' }}>
-            {/* NAV BAR CORRIGIDA */}
             <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm">
                 <Container>
                     <Navbar.Brand className="fw-bold">📦 Estoque Pro</Navbar.Brand>
-                    
                     <Nav className="ms-auto">
-                        {/* BOTÃO DE ADMIN (Só aparece se for admin) */}
                         {isAdmin && (
-                            <Button 
-                                variant="warning" 
-                                size="sm" 
-                                className="me-2 fw-bold"
-                                onClick={() => navigate('/admin')}
-                            >
+                            <Button variant="warning" size="sm" className="me-2 fw-bold" onClick={() => navigate('/admin')}>
                                 🛡️ Área Admin
                             </Button>
                         )}
-
-                        <Button 
-                            variant="outline-info" 
-                            size="sm" 
-                            className="me-2" 
-                            onClick={() => navigate('/perfil')}
-                        >
+                        <Button variant="outline-info" size="sm" className="me-2" onClick={() => navigate('/perfil')}>
                             👤 Meu Perfil
                         </Button>
-
-                        <Button 
-                            variant="outline-light" 
-                            size="sm" 
-                            onClick={() => { localStorage.removeItem('token'); navigate('/'); }}
-                        >
+                        <Button variant="outline-light" size="sm" onClick={() => { localStorage.removeItem('token'); navigate('/'); }}>
                             Sair
                         </Button>
                     </Nav>
                 </Container>
             </Navbar>
 
-            {/* HERO SECTION */}
+            {/* HERO E LISTAGEM (MANTIVE IGUAL) */}
             <div className="bg-primary text-white py-5 mb-5 shadow">
                 <Container>
                     <Row className="align-items-center">
@@ -158,7 +149,6 @@ function Produtos() {
                 </Container>
             </div>
 
-            {/* LISTA DE PRODUTOS */}
             <Container className="pb-5">
                 <Row>
                     {produtosFiltrados.map(produto => (
@@ -171,9 +161,7 @@ function Produtos() {
                                         </Badge>
                                         <small className="text-muted">ID: #{produto.id}</small>
                                     </div>
-                                    
                                     <Card.Title className="fw-bold fs-4 mb-3">{produto.nome}</Card.Title>
-                                    
                                     <div className="mt-auto pt-3 border-top">
                                         <div className="d-flex justify-content-between align-items-end">
                                             <div>
@@ -185,8 +173,7 @@ function Produtos() {
                                                     {produto.quantidade > 0 ? `${produto.quantidade} em estoque` : 'Esgotado'}
                                                 </small>
                                                 <Button 
-                                                    variant="dark" 
-                                                    className="mt-2 px-4"
+                                                    variant="dark" className="mt-2 px-4"
                                                     disabled={produto.quantidade <= 0}
                                                     onClick={() => abrirModal(produto)}
                                                 >
@@ -202,7 +189,7 @@ function Produtos() {
                 </Row>
             </Container>
 
-            {/* MODAL DE COMPRA */}
+            {/* --- MODAL DE COMPRA ATUALIZADO --- */}
             <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                 <Modal.Header closeButton className="border-0 pb-0">
                     <Modal.Title className="fw-bold">Finalizar Pedido</Modal.Title>
@@ -212,19 +199,50 @@ function Produtos() {
                         <div className="py-3">
                             <h5 className="text-primary mb-4">{produtoSelecionado.nome}</h5>
                             
-                            <Form.Group>
+                            {/* QUANTIDADE */}
+                            <Form.Group className="mb-3">
                                 <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <Form.Label className="m-0">Quantidade:</Form.Label>
+                                    <Form.Label className="m-0 fw-bold">Quantidade:</Form.Label>
                                     <span className="text-muted small">Disponível: {produtoSelecionado.quantidade}</span>
                                 </div>
                                 <Form.Control 
-                                    type="number" 
-                                    min="1" 
-                                    max={produtoSelecionado.quantidade}
-                                    value={qtdCompra} 
-                                    onChange={(e) => setQtdCompra(parseInt(e.target.value))}
-                                    size="lg"
+                                    type="number" min="1" max={produtoSelecionado.quantidade}
+                                    value={qtdCompra} onChange={(e) => setQtdCompra(parseInt(e.target.value))}
                                 />
+                            </Form.Group>
+
+                            {/* --- CAMPO VENDEDOR (NOVO) --- */}
+                            <Form.Group className="mb-3">
+                                <Form.Label className="fw-bold">Vendedor (Opcional):</Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="Deixe vazio para Venda Online"
+                                    value={vendedor}
+                                    onChange={(e) => setVendedor(e.target.value)}
+                                />
+                            </Form.Group>
+
+                            {/* --- CAMPO TIPO DE SERVIÇO (NOVO) --- */}
+                            <Form.Group className="mb-3">
+                                <Form.Label className="fw-bold">Tipo de Serviço:</Form.Label>
+                                <div className="d-flex gap-3">
+                                    <Form.Check 
+                                        type="radio"
+                                        id="radio-loja"
+                                        label="Vou até o local"
+                                        name="tipoAtendimento"
+                                        checked={tipoAtendimento === 'NA_LOJA'}
+                                        onChange={() => setTipoAtendimento('NA_LOJA')}
+                                    />
+                                    <Form.Check 
+                                        type="radio"
+                                        id="radio-domicilio"
+                                        label="Equipe vai até mim"
+                                        name="tipoAtendimento"
+                                        checked={tipoAtendimento === 'DOMICILIO'}
+                                        onChange={() => setTipoAtendimento('DOMICILIO')}
+                                    />
+                                </div>
                             </Form.Group>
 
                             <div className="bg-light p-3 rounded mt-3 d-flex justify-content-between">

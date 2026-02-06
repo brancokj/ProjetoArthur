@@ -1,9 +1,24 @@
 package com.estoque.dto;
 
-import com.estoque.model.ItemVenda;
+public class ItemVendaDTO {
 
-public record ItemVendaDTO(String produto, Integer quantidade, Double precoUnitario) {
-    public ItemVendaDTO(ItemVenda item) {
-        this(item.getProduto().getNome(), item.getQuantidade(), item.getPrecoUnitario());
+    private Long idProduto;
+    private Integer quantidade;
+
+    // --- GETTERS E SETTERS OBRIGATÓRIOS ---
+    public Long getIdProduto() {
+        return idProduto;
+    }
+
+    public void setIdProduto(Long idProduto) {
+        this.idProduto = idProduto;
+    }
+
+    public Integer getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(Integer quantidade) {
+        this.quantidade = quantidade;
     }
 }

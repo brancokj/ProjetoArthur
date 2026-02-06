@@ -29,7 +29,7 @@ public class VendaService {
         venda.setUsuario(usuarioAutenticado);
         venda.setDataVenda(LocalDateTime.now());
 
-        for (ItemVenda item : venda.getItens()) {
+        for (ItemVenda item : venda.getListaItemVendas()) {
             // 1. Buscar o produto atualizado no banco
             Produto produto = produtoRepository.findById(item.getProduto().getId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado"));

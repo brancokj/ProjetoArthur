@@ -1,116 +1,102 @@
 package com.estoque.controller;
 
-import com.estoque.dto.VendaInputDTO;
+import com.estoque.dto.ItemVendaDTO;
+import com.estoque.dto.VendaDTO;
 import com.estoque.model.ItemVenda;
 import com.estoque.model.Produto;
 import com.estoque.model.Usuario;
 import com.estoque.model.Venda;
-import com.estoque.repository.VendaRepository;
+import com.estoque.repository.ItemVendaRepository;
 import com.estoque.repository.ProdutoRepository;
-import com.estoque.repository.UsuarioRepository;
+import com.estoque.repository.VendaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/vendas")
 public class VendaController {
 
+    // --- INJEÇÕES QUE FALTAVAM (CORREÇÃO DO ERRO) ---
     @Autowired
     private VendaRepository vendaRepository;
 
     @Autowired
     private ProdutoRepository produtoRepository;
-    
+
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private ItemVendaRepository itemVendaRepository;
 
-    
-    @PostMapping
-    public ResponseEntity<Void> criarVenda(@RequestBody VendaInputDTO dados) {
-        // 1. Cria a Venda e vincula ao Usuário logado
-        Venda venda = new Venda();
-        venda.setDataVenda(LocalDateTime.now());
-        venda.setUsuario((Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    // --- ENDPOINT DE FINALIZAR VENDA ---
+    @PostMapping("/finalizar")
+    public ResponseEntity<?> finalizarVenda(
+            @RequestBody VendaDTO dados, 
+            @AuthenticationPrincipal Usuario usuarioLogado) {
 
-        // 2. Converte os itens do DTO para Entidades reais
-        List<ItemVenda> itens = dados.itens().stream().map(itemDto -> {
-            // Busca o produto pelo ID
-            Produto produto = produtoRepository.findById(itemDto.idProduto())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
-            // Verifica estoque
-            if (produto.getQuantidade() < itemDto.quantidade()) {
-                throw new RuntimeException("Estoque insuficiente para o produto: " + produto.getNome());
-            }
-
-            // Cria o item da venda
-            ItemVenda item = new ItemVenda();
-            item.setProduto(produto);
-            item.setQuantidade(itemDto.quantidade());
-            item.setVenda(venda);
-            item.setPrecoUnitario(produto.getPreco()); 
-
-            produto.setQuantidade(produto.getQuantidade() - itemDto.quantidade());
-            produtoRepository.save(produto);
-
-            return item;
-        }).collect(Collectors.toList());
-
-        venda.setItens(itens);
-        venda.setValorTotal(itens.stream().mapToDouble(i -> i.getPrecoUnitario() * i.getQuantidade()).sum());
-        
-        vendaRepository.save(venda);
-        
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/todas")
-    public List<Map<String, Object>> listarTodasVendas(
-            @RequestParam(required = false) String inicio,
-            @RequestParam(required = false) String fim
-    ) {
-        List<Venda> vendas;
-
-        if (inicio != null && fim != null) {
-            LocalDateTime dataInicio = LocalDate.parse(inicio).atStartOfDay();
-            LocalDateTime dataFim = LocalDate.parse(fim).atTime(23, 59, 59);
-            vendas = vendaRepository.findByDataVendaBetween(dataInicio, dataFim);
-        } else {
-            vendas = vendaRepository.findAll();
+        if (dados.getItens() == null || dados.getItens().isEmpty()) {
+            return ResponseEntity.badRequest().body("A venda precisa ter pelo menos um produto.");
         }
 
-        if (vendas.isEmpty()) return List.of();
+        Venda novaVenda = new Venda();
+        novaVenda.setUsuario(usuarioLogado);
+        novaVenda.setDataVenda(LocalDateTime.now());
+        
+        // Define Vendedor e Tipo (com valores padrão se vier vazio)
+        novaVenda.setVendedor((dados.getVendedor() == null || dados.getVendedor().isEmpty()) ? "Venda Online" : dados.getVendedor());
+        novaVenda.setTipoAtendimento(dados.getTipoAtendimento() == null ? "NA_LOJA" : dados.getTipoAtendimento());
 
-        return vendas.stream().map(venda -> {
-            Map<String, Object> dto = new HashMap<>();
-            dto.put("id", venda.getId());
-            dto.put("dataVenda", venda.getDataVenda());
-            dto.put("valorTotal", venda.getValorTotal());
+        // Salva a venda primeiro para ter o ID
+        novaVenda = vendaRepository.save(novaVenda);
 
-            if (venda.getUsuario() != null) {
-                Map<String, String> user = new HashMap<>();
-                user.put("email", venda.getUsuario().getEmail());
-                dto.put("usuario", user);
+        double valorTotal = 0.0;
+        List<ItemVenda> itensParaSalvar = new ArrayList<>();
+
+        for (ItemVendaDTO itemDto : dados.getItens()) {
+            // Busca o produto no banco
+            Produto produto = produtoRepository.findById(itemDto.getIdProduto())
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado ID: " + itemDto.getIdProduto()));
+
+            // Verifica Estoque
+            if (produto.getQuantidade() < itemDto.getQuantidade()) {
+                return ResponseEntity.badRequest().body("Estoque insuficiente para: " + produto.getNome());
             }
 
-            List<Map<String, Object>> itensDto = venda.getItens().stream().map(item -> {
-                Map<String, Object> i = new HashMap<>();
-                i.put("quantidade", item.getQuantidade());
-                i.put("produto", Map.of("nome", item.getProduto().getNome()));
-                return i;
-            }).collect(Collectors.toList());
+            // Baixa no Estoque
+            produto.setQuantidade(produto.getQuantidade() - itemDto.getQuantidade());
+            produtoRepository.save(produto);
 
-            dto.put("itens", itensDto);
-            return dto;
-        }).collect(Collectors.toList());
+            // Cria o Item da Venda
+            ItemVenda item = new ItemVenda();
+            item.setVenda(novaVenda);
+            item.setProduto(produto);
+            item.setQuantidade(itemDto.getQuantidade());
+            item.setPrecoUnitario(produto.getPreco());
+            item.setProdutoNome(produto.getNome()); // Grava o nome histórico
+
+            itensParaSalvar.add(item);
+            
+            // Soma ao total
+            valorTotal += (produto.getPreco() * itemDto.getQuantidade());
+        }
+
+        // Salva os itens todos de uma vez
+        itemVendaRepository.saveAll(itensParaSalvar);
+        
+        // Atualiza o valor total da venda
+        novaVenda.setValorTotal(valorTotal);
+        vendaRepository.save(novaVenda);
+
+        return ResponseEntity.ok("Venda realizada! Total: R$ " + valorTotal);
+    }
+
+    // --- ENDPOINT DE LISTAR (Dashboard) ---
+    @GetMapping
+    public ResponseEntity<List<Venda>> listarTodas() {
+        return ResponseEntity.ok(vendaRepository.findAll());
     }
 }
