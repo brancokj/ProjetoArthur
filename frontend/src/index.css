@@ -1,0 +1,68 @@
+/* Importando fonte moderna 'Inter' do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* Cinza bem suave, padrão de dashboards modernos */
+}
+
+/* Utilitário para deixar os Cards com efeito de elevação */
+.hover-scale {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* Gradiente bonito para o fundo do Login */
+.login-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- ESTILOS PERSONALIZADOS PARA AS ABAS (TABS) --- */
+
+/* 1. Estilo das abas INATIVAS (Amarelo Clarinho) */
+.custom-tabs .nav-link {
+    background-color: #fff9db; /* <--- O Amarelo Pastel */
+    color: #665c1d;            /* Texto em tom "mostarda escuro" para ler bem */
+    border: 1px solid #faeccc; /* Borda levemente amarelada */
+    
+    /* Formato da Orelha */
+    margin-right: 6px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600; /* Um pouco mais grosso para destacar */
+    transition: all 0.2s ease;
+}
+
+/* 2. Quando passa o mouse por cima (Hover) */
+.custom-tabs .nav-link:hover {
+    background-color: #fff3cd; /* Amarelo um pouquinho mais forte */
+    color: #4a410d;
+    cursor: pointer;
+}
+
+/* 3. Estilo da aba ATIVA (Continua branca para conectar com o conteúdo) */
+.custom-tabs .nav-link.active {
+    background-color: #ffffff !important;
+    color: #000000 !important; /* Texto preto para foco total */
+    border-color: #dee2e6 #dee2e6 transparent; /* Borda cinza, sem borda embaixo */
+    border-bottom: 2px solid white; /* Gambiarra visual para "colar" no card */
+    font-weight: 700;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.03); /* Leve sombra para cima */
+    transform: translateY(1px); /* Pequeno ajuste visual */
+}
+
+/* --- MELHORIA NAS TABELAS --- */
+/* (Mantenha este se quiser as linhas da tabela bem definidas) */
+.table-bordered > :not(caption) > * > * {
+    border-color: #dce0e5;
+}
