@@ -18,9 +18,11 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // --- FORÇA A ATUALIZAÇÃO DO CLIENTE ---
-        Usuario cliente = null;
         
+        // --- CORREÇÃO: BUSCAR O USUÁRIO NO BANCO PRIMEIRO ---
+        // O cast (Usuario) é necessário porque seu repositório retorna UserDetails
+        Usuario cliente = (Usuario) usuarioRepository.findByEmail("cliente@gmail.com");
+
         if (cliente == null) {
             cliente = new Usuario();
             cliente.setEmail("cliente@gmail.com");
@@ -28,12 +30,14 @@ public class DataSeeder implements CommandLineRunner {
             cliente.setCpf("111.111.111-11");
         }
         
+        // Atualiza a senha
         cliente.setSenha(passwordEncoder.encode("123456"));
         usuarioRepository.save(cliente);
 
-        // --- FORÇA A ATUALIZAÇÃO DO ADMIN ---
-        Usuario admin = null;
-        
+
+        // --- MESMA COISA PARA O ADMIN ---
+        Usuario admin = (Usuario) usuarioRepository.findByEmail("admin@estoque.com");
+
         if (admin == null) {
             admin = new Usuario();
             admin.setEmail("admin@estoque.com");
@@ -44,6 +48,6 @@ public class DataSeeder implements CommandLineRunner {
         admin.setSenha(passwordEncoder.encode("123456"));
         usuarioRepository.save(admin);
 
-        System.out.println("SENHAS ATUALIZADAS E CRIPTOGRAFADAS COM SUCESSO!");
+        System.out.println("✅ SENHAS ATUALIZADAS E CRIPTOGRAFADAS COM SUCESSO!");
     }
 }
