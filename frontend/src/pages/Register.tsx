@@ -1,115 +1,113 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
+import { useNavigate, Link } from 'react-router-dom';
 
-function Register() {
-    const [email, setEmail] = useState('');
-    const [documento, setDocumento] = useState(''); // CPF ou CNPJ
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+export function Register() {
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [documento, setDocumento] = useState('');
+  const [cep, setCep] = useState('');
+  const [numero, setNumero] = useState('');           // Novo nome
+  const [complemento, setComplemento] = useState(''); // Novo campo
+  
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
+  const handleRegister = async () => {
+    if(!nome || !email || !password || !cep || !numero) {
+      setError("Preencha os campos obrigatórios (*)");
+      return;
+    }
+    setError('');
+    setLoading(true);
 
-        // Validações básicas no Front
-        if (password !== confirmPassword) {
-            setError("As senhas não coincidem!");
-            return;
-        }
-        if (password.length < 6) {
-            setError("A senha deve ter pelo menos 6 caracteres.");
-            return;
-        }
+    try {
+      // Ajuste a URL se necessário (/api/auth/register ou /auth/register)
+      await axios.post('http://localhost:8080/api/auth/register', {
+        nome,
+        email,
+        password,
+        documento,
+        cep,
+        numero,        // Enviando separado
+        complemento    // Enviando separado
+      });
 
-        try {
-            await axios.post('http://localhost:8080/auth/register', {
-                email,
-                password,
-                documento
-            });
+      alert('Cadastro realizado com sucesso!');
+      navigate('/');
+    } catch (err: any) {
+      console.error(err);
+      if (err.response) setError(`Erro: ${err.response.data || err.response.status}`);
+      else setError("Erro de conexão.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            alert("✅ Conta criada com sucesso! Faça login agora.");
-            navigate('/'); // Manda de volta pro login
+  return (
+    <div className="login-bg">
+      <div className="card shadow border-0 p-4 m-3" style={{ maxWidth: '500px', width: '100%' }}>
+        <div className="text-center mb-4">
+          <h2 className="fw-bold text-primary">Criar Conta</h2>
+        </div>
 
-        } catch (err) {
-            setError("Erro ao cadastrar. Verifique se o e-mail já existe.");
-        }
-    };
+        {error && <div className="alert alert-danger p-2 text-center small">{error}</div>}
 
-    return (
-        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
-            <Card className="shadow-lg border-0" style={{ width: '400px' }}>
-                <Card.Body className="p-4">
-                    <div className="text-center mb-4">
-                        <h3 className="fw-bold text-primary">Crie sua Conta</h3>
-                        <p className="text-muted small">Junte-se ao nosso sistema de estoque</p>
-                    </div>
+        <div className="d-flex flex-column gap-3">
+          
+          <div>
+            <label className="form-label fw-bold small">Nome Completo *</label>
+            <input type="text" className="form-control" value={nome} onChange={e => setNome(e.target.value)} />
+          </div>
 
-                    {error && <Alert variant="danger" className="py-2 text-center small">{error}</Alert>}
+          <div>
+            <label className="form-label fw-bold small">E-mail *</label>
+            <input type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} />
+          </div>
 
-                    <Form onSubmit={handleRegister}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>E-mail</Form.Label>
-                            <Form.Control 
-                                type="email" 
-                                placeholder="exemplo@email.com" 
-                                required 
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                            />
-                        </Form.Group>
+          <div>
+            <label className="form-label fw-bold small">CPF / CNPJ</label>
+            <input type="text" className="form-control" value={documento} onChange={e => setDocumento(e.target.value)} />
+          </div>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>CPF ou CNPJ</Form.Label>
-                            <Form.Control 
-                                type="text" 
-                                placeholder="Digite apenas números" 
-                                value={documento}
-                                onChange={e => setDocumento(e.target.value)}
-                            />
-                        </Form.Group>
+          {/* LINHA TRIPLA: CEP | NÚMERO | COMPLEMENTO */}
+          <div className="row g-2">
+            <div className="col-4">
+              <label className="form-label fw-bold small">CEP *</label>
+              <input type="text" className="form-control" placeholder="00000-000"
+                value={cep} onChange={e => setCep(e.target.value)} />
+            </div>
+            <div className="col-4">
+              <label className="form-label fw-bold small">Número *</label>
+              <input type="text" className="form-control" placeholder="123"
+                value={numero} onChange={e => setNumero(e.target.value)} />
+            </div>
+            <div className="col-4">
+              <label className="form-label fw-bold small">Comp.</label>
+              <input type="text" className="form-control" placeholder="Apto/Bl"
+                value={complemento} onChange={e => setComplemento(e.target.value)} />
+            </div>
+          </div>
+          <div className="form-text text-center mb-1" style={{ fontSize: '0.8rem' }}>* Buscamos a rua automaticamente</div>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Senha</Form.Label>
-                            <Form.Control 
-                                type="password" 
-                                placeholder="******" 
-                                required 
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                            />
-                        </Form.Group>
+          <div>
+            <label className="form-label fw-bold small">Senha *</label>
+            <input type="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} />
+          </div>
 
-                        <Form.Group className="mb-4">
-                            <Form.Label>Confirmar Senha</Form.Label>
-                            <Form.Control 
-                                type="password" 
-                                placeholder="******" 
-                                required 
-                                value={confirmPassword}
-                                onChange={e => setConfirmPassword(e.target.value)}
-                            />
-                        </Form.Group>
+          <button type="button" onClick={handleRegister} className="btn btn-primary w-100 fw-bold mt-2" disabled={loading}>
+            {loading ? 'Enviando...' : 'CADASTRAR'}
+          </button>
+        </div>
 
-                        <Button variant="primary" type="submit" className="w-100 mb-3 fw-bold">
-                            CADASTRAR
-                        </Button>
-                    </Form>
-
-                    <div className="text-center border-top pt-3">
-                        <small className="text-muted">Já tem uma conta? </small>
-                        <Button variant="link" className="p-0 fw-bold text-decoration-none" onClick={() => navigate('/')}>
-                            Fazer Login
-                        </Button>
-                    </div>
-                </Card.Body>
-            </Card>
-        </Container>
-    );
+        <div className="text-center mt-3">
+          <small><Link to="/">Voltar para Login</Link></small>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Register;

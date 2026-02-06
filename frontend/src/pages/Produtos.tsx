@@ -54,10 +54,12 @@ function Produtos() {
     };
 
     // --- 3. FUNÇÕES AUXILIARES ---
-    const produtosFiltrados = produtos.filter(p => 
-        p.nome.toLowerCase().includes(busca.toLowerCase()) ||
-        p.categoria.toLowerCase().includes(busca.toLowerCase())
-    );
+    const produtosFiltrados = produtos.length > 0 
+      ? produtos.filter(p => 
+          p.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+          p.categoria?.toLowerCase().includes(busca.toLowerCase())
+        )
+      : [];
 
     const abrirModal = (p: Produto) => {
         setProdutoSelecionado(p);

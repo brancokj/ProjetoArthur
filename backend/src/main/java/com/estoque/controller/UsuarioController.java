@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,10 +21,9 @@ public class UsuarioController {
     private UsuarioRepository usuarioRepository;
 
     @GetMapping("/me")
-    public ResponseEntity<UsuarioResponseDTO> meuPerfil() {
-        Usuario usuarioLogado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return ResponseEntity.ok(new UsuarioResponseDTO(usuarioLogado));
+    public ResponseEntity<Usuario> getMyProfile(@AuthenticationPrincipal Usuario usuario) {
+        // O Spring Security injeta o usuário logado automaticamente aqui
+        return ResponseEntity.ok(usuario);
     }
 
     @GetMapping

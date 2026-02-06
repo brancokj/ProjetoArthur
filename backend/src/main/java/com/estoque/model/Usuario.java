@@ -15,6 +15,15 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String nome;
+
+    @Column(nullable = false)
+    private String endereco;
+
+    @Column(nullable = false, length = 9)
+    private String cep;
+
     // BLINDAGEM 1: E-mail único e obrigatório
     @Column(nullable = false, unique = true)
     private String email;
@@ -86,4 +95,13 @@ public class Usuario implements UserDetails {
 
     public Boolean getAdmin() { return admin; }
     public void setAdmin(Boolean admin) { this.admin = admin; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public String getEndereco() { return endereco; }
+    public void setEndereco(String endereco) { this.endereco = endereco; }
+
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
 }

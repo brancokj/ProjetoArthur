@@ -37,7 +37,7 @@ function Login() {
         <Card className="shadow-lg border-0 p-4">
           <Card.Body>
             <div className="text-center mb-4">
-              <h2 className="fw-bold text-primary">Estoque Pro</h2>
+              <h2 className="fw-bold text-primary">Para-brisa & acessórios</h2>
               <p className="text-muted">Acesse sua conta para continuar</p>
             </div>
 
@@ -45,7 +45,7 @@ function Login() {
 
             <Form onSubmit={handleLogin}>
               <Form.Group className="mb-3">
-                <Form.Label>E-mail Corporativo</Form.Label>
+                <Form.Label>E-mail Pessoal ou Corporativo</Form.Label>
                 <Form.Control
                   type="email"
                   placeholder="ex: admin@empresa.com"
@@ -77,7 +77,7 @@ function Login() {
             </Form>
           </Card.Body>
           <Card.Footer className="text-center bg-white border-0 text-muted mt-2">
-            <small>Sistema Seguro v1.0</small>
+            <small>Sistema v1.0</small>
           </Card.Footer>
         </Card>
       </Container>
