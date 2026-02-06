@@ -1,7 +1,6 @@
 package com.estoque.model;
 
 import jakarta.persistence.*;
-import lombok.Data; // Se não usar lombok, gere os Getters/Setters manualmente
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
@@ -19,11 +18,9 @@ public class Venda {
 
     private Double valorTotal;
 
-    // --- NOVOS CAMPOS ---
-    private String vendedor; // Pode ser nome ou "Venda Online"
-    
-    private String tipoAtendimento; // "LOJA" ou "DOMICILIO"
-    // --------------------
+    // --- CAMPOS EXTRAS ---
+    private String vendedor; 
+    private String tipoAtendimento;
 
     // Relacionamento com Usuário (Cliente)
     @ManyToOne
@@ -59,7 +56,9 @@ public class Venda {
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    public List<ItemVenda> getListaItemVendas(){
+    // --- A CORREÇÃO ESTÁ AQUI ---
+    // Antes estava getListaItemVendas(), agora é getItens()
+    public List<ItemVenda> getItens() {
         return itens;
     }
 
@@ -69,9 +68,9 @@ public class Venda {
             return;
         }
         this.itens = new ArrayList<>();
-        for (ItemVenda venda : listaItens) {
-            venda.setVenda(this);
-            this.itens.add(venda);
+        for (ItemVenda item : listaItens) {
+            item.setVenda(this); // Garante o vínculo do ID
+            this.itens.add(item);
         }
     }
 }
