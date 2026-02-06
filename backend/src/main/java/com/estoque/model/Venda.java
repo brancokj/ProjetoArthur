@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data; // Se não usar lombok, gere os Getters/Setters manualmente
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "vendas")
@@ -29,8 +30,8 @@ public class Venda {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "venda", fetch = FetchType.EAGER)
-    private List<ItemVenda> itens;
+    @OneToMany(mappedBy = "venda", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<ItemVenda> itens = new ArrayList<>();
 
     // Construtor vazio
     public Venda() {}
@@ -60,5 +61,17 @@ public class Venda {
 
     public List<ItemVenda> getListaItemVendas(){
         return itens;
+    }
+
+    public void setItens(List<ItemVenda> listaItens) {
+        if (listaItens == null) {
+            this.itens = new ArrayList<>();
+            return;
+        }
+        this.itens = new ArrayList<>();
+        for (ItemVenda venda : listaItens) {
+            venda.setVenda(this);
+            this.itens.add(venda);
+        }
     }
 }
