@@ -29,7 +29,10 @@ public class VendaService {
         venda.setUsuario(usuarioAutenticado);
         venda.setDataVenda(LocalDateTime.now());
 
-        var itens = venda.getListaItemVendas();
+        // --- CORREÇÃO AQUI ---
+        // Mudamos de venda.getListaItemVendas() para venda.getItens()
+        var itens = venda.getItens(); 
+        
         if (itens == null || itens.isEmpty()) {
             throw new NegocioException("Venda deve conter ao menos um item");
         }

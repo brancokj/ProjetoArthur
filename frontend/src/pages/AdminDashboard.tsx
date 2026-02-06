@@ -281,7 +281,7 @@ export function AdminDashboard() {
   return (
     <div className="d-flex" style={{ minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
       <div className="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style={{ width: '280px', minHeight: '100vh' }}>
-        <a href="/" className="fs-4 fw-bold text-white text-decoration-none mb-3">🛡️ Admin Pro</a><hr />
+        <a href="/Produtos" className="fs-4 fw-bold text-white text-decoration-none mb-3">🛡️ Admin Pro</a><hr />
         <ul className="nav nav-pills flex-column mb-auto gap-2">
           <li><button className={`nav-link w-100 text-start text-white ${view==='PRODUTOS'?'active bg-primary':''}`} onClick={()=>setView('PRODUTOS')}>📦 Estoque {produtosBaixoEstoque.length>0 && <Badge bg="danger" className="ms-2">{produtosBaixoEstoque.length}</Badge>}</button></li>
           <li><button className={`nav-link w-100 text-start text-white ${view==='VENDAS'?'active bg-primary':''}`} onClick={()=>setView('VENDAS')}>📊 Vendas</button></li>
