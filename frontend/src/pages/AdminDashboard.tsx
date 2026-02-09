@@ -18,9 +18,9 @@ interface Venda {
   dataVenda: string;
   valorTotal: number;
   vendedor: string;
-  tipoAtendimento: 'NA_LOJA' | 'DOMICILIO';
-  usuarioNome?: string;     // Pode vir achatado
-  usuario?: { nome: string }; // Ou aninhado
+  tipoAtendimento: 'NA LOJA' | 'DOMICILIO';
+  usuarioNome?: string;         // Campo calculado no Java
+  usuario?: { nome: string };   // Objeto aninhado (se houver)
   itens: any[];
 }
 
@@ -94,6 +94,8 @@ export function AdminDashboard() {
       setProdutos(Array.isArray(resProd.data) ? resProd.data : resProd.data.content || []);
 
       const resVendas = await axios.get('http://localhost:8080/api/vendas', config);
+      // LOG DE DEPURAÇÃO PARA VER O NOME DO CLIENTE NO CONSOLE
+      console.log("Vendas carregadas:", resVendas.data); 
       setVendas(Array.isArray(resVendas.data) ? resVendas.data : resVendas.data.content || []);
 
       try {
@@ -112,10 +114,9 @@ export function AdminDashboard() {
   // --- LÓGICA DE ATRIBUIÇÃO ---
   const abrirModalAtribuicao = (venda: Venda) => {
     setVendaParaAtribuir(venda);
-    // Verifica se já tem equipe designada (ignora o texto padrão)
-    const textoPadrao = 'Equipe Externa (Não especificada)';
-    if (venda.vendedor && venda.vendedor !== textoPadrao && venda.vendedor !== 'Venda Online') {
-        const nomesAtuais = venda.vendedor.split(', ').map(s => s.trim());
+    // Se o vendedor atual NÃO contiver a palavra "Externa", assumimos que é uma equipe válida
+    if (venda.vendedor && !venda.vendedor.includes('Equipe Externa') && venda.vendedor !== 'Venda Online') {
+        const nomesAtuais = venda.vendedor.split(',').map(s => s.trim());
         setEquipeSelecionada(nomesAtuais);
     } else {
         setEquipeSelecionada([]);
@@ -133,7 +134,8 @@ export function AdminDashboard() {
 
   const salvarAtribuicao = async () => {
       if (!vendaParaAtribuir) return;
-      // Se não selecionar ninguém, volta para o texto padrão
+      
+      // Se tiver gente selecionada, junta os nomes. Se não, volta pro padrão.
       const nomesFinal = equipeSelecionada.length > 0 
         ? equipeSelecionada.join(', ') 
         : 'Equipe Externa (Não especificada)';
@@ -145,7 +147,7 @@ export function AdminDashboard() {
           );
           alert("Equipe atualizada com sucesso!");
           setShowAssignModal(false);
-          carregarTudo(); // Recarrega para atualizar a tabela
+          carregarTudo(); 
       } catch (e) {
           alert("Erro ao atribuir equipe.");
       }
@@ -206,7 +208,7 @@ export function AdminDashboard() {
   });
 
   const totalFaturado = vendasFiltradas.reduce((acc, v) => acc + (v.valorTotal || 0), 0);
-  const qtdLoja = vendasFiltradas.filter(v => v.tipoAtendimento === 'NA_LOJA').length;
+  const qtdLoja = vendasFiltradas.filter(v => v.tipoAtendimento === 'NA LOJA').length;
   const qtdDomicilio = vendasFiltradas.filter(v => v.tipoAtendimento === 'DOMICILIO').length;
   const produtosBaixoEstoque = produtos.filter(p => p.quantidade <= 10);
   const listaProdutosExibida = mostrarSoBaixo ? produtosBaixoEstoque : produtos;
@@ -235,25 +237,30 @@ export function AdminDashboard() {
                 <thead className="bg-light text-uppercase small text-muted"><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Equipe</th><th>Tipo</th><th>Itens</th><th className="text-end">Total</th></tr></thead>
                 <tbody>
                     {vendasFiltradas.map(v => {
-                        // --- CORREÇÃO 2: Lógica Robusta para Status ---
-                        const textoPendente = 'Equipe Externa (Não especificada)';
-                        const temEquipe = v.vendedor && v.vendedor !== textoPendente;
+                        // --- CORREÇÃO 2: Lógica mais flexível para "Pendente" ---
+                        // Se incluir "Equipe Externa", então é pendente. Caso contrário, se tiver texto, é a equipe.
+                        const vendedorStr = v.vendedor || '';
+                        const isPendente = vendedorStr.includes('Equipe Externa') || vendedorStr === '';
                         const isDomicilio = v.tipoAtendimento === 'DOMICILIO';
+
+                        // --- CORREÇÃO 1: Nome do Cliente ---
+                        // Tenta pegar de 'usuarioNome' (campo achatado) OU 'usuario.nome' (objeto)
+                        // Se não vier nenhum, mostra "Anônimo"
+                        const nomeCliente = v.usuarioNome || v.usuario?.nome || 'Cliente Anônimo';
 
                         return (
                             <tr key={v.id}>
                                 <td className="text-muted small">#{v.id}</td>
                                 <td>{v.dataVenda ? new Date(v.dataVenda).toLocaleDateString() : '-'}</td>
                                 
-                                {/* --- CORREÇÃO 1: Nome do Cliente (Flattened ou Nested) --- */}
-                                <td className="fw-bold">
-                                    {v.usuarioNome || v.usuario?.nome || <span className="text-muted fst-italic">Anônimo</span>}
+                                <td className="fw-bold text-primary">
+                                    {nomeCliente}
                                 </td>
 
                                 <td>
                                     {isDomicilio ? (
                                         <div className="d-flex align-items-center gap-2">
-                                            {temEquipe ? (
+                                            {!isPendente ? (
                                                 <Badge bg="primary" className="text-wrap" style={{maxWidth:'150px'}}>{v.vendedor}</Badge>
                                             ) : (
                                                 <Badge bg="danger">Pendente</Badge>
@@ -283,7 +290,7 @@ export function AdminDashboard() {
   return (
     <div className="d-flex" style={{ minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
       <div className="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style={{ width: '280px', minHeight: '100vh' }}>
-        <a href="/" className="fs-4 fw-bold text-white text-decoration-none mb-3">🛡️ Admin Pro</a><hr />
+        <a href="/produtos" className="fs-4 fw-bold text-white text-decoration-none mb-3">🛡️ Admin Pro</a><hr />
         <ul className="nav nav-pills flex-column mb-auto gap-2">
           <li><button className={`nav-link w-100 text-start text-white ${view==='PRODUTOS'?'active bg-primary':''}`} onClick={()=>setView('PRODUTOS')}>📦 Estoque</button></li>
           <li><button className={`nav-link w-100 text-start text-white ${view==='VENDAS'?'active bg-primary':''}`} onClick={()=>setView('VENDAS')}>📊 Vendas</button></li>
