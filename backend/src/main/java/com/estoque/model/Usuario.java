@@ -24,27 +24,27 @@ public class Usuario implements UserDetails {
     @Column(nullable = false, length = 9)
     private String cep;
 
-    // BLINDAGEM 1: E-mail único e obrigatório
+    // --- NOVO CAMPO: TELEFONE ---
+    @Column(nullable = false)
+    private String telefone; 
+
     @Column(nullable = false, unique = true)
     private String email;
 
-    // BLINDAGEM 2: Senha obrigatória
     @Column(nullable = false)
     private String senha;
 
-    // BLINDAGEM 3: CPF único (se preenchido)
     @Column(unique = true)
     private String cpf;
 
-    // BLINDAGEM 4: CNPJ único (se preenchido)
     @Column(unique = true)
     private String cnpj;
 
-    private Boolean admin; // true = ADMIN, false = CLIENTE
+    private Boolean admin; 
 
     public Usuario() {}
 
-    // --- MÉTODOS DE SEGURANÇA (Spring Security) ---
+    // --- MÉTODOS DE SEGURANÇA ---
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.admin != null && this.admin) {
@@ -54,32 +54,30 @@ public class Usuario implements UserDetails {
         }
     }
 
-    @Override
-    public String getPassword() { return senha; }
-
-    @Override
-    public String getUsername() { return email; }
-
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-
-    @Override
-    public boolean isAccountNonLocked() { return true; }
-
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return true; }
-
-    // Helper para facilitar verificação de admin
-    public boolean isAdmin() {
-        return admin != null && admin;
-    }
+    @Override public String getPassword() { return senha; }
+    @Override public String getUsername() { return email; }
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return true; }
+    public boolean isAdmin() { return admin != null && admin; }
 
     // --- GETTERS E SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    // Getter e Setter do Telefone
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public String getEndereco() { return endereco; }
+    public void setEndereco(String endereco) { this.endereco = endereco; }
+
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -95,13 +93,4 @@ public class Usuario implements UserDetails {
 
     public Boolean getAdmin() { return admin; }
     public void setAdmin(Boolean admin) { this.admin = admin; }
-
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-
-    public String getEndereco() { return endereco; }
-    public void setEndereco(String endereco) { this.endereco = endereco; }
-
-    public String getCep() { return cep; }
-    public void setCep(String cep) { this.cep = cep; }
 }

@@ -37,13 +37,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginDTO data) {
-        System.out.println("Tentando logar com: " + data.getEmail());
-        System.out.println("Senha recebida (texto puro): " + data.getPassword());
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.getEmail(), data.getPassword());
         var auth = this.authenticationManager.authenticate(usernamePassword);
-
         var token = tokenService.generateToken((Usuario) auth.getPrincipal());
-
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
@@ -64,20 +60,19 @@ public class AuthController {
         
         Usuario newUser = new Usuario();
         newUser.setNome(data.getNome());
+        newUser.setTelefone(data.getTelefone()); // <--- SALVANDO O TELEFONE
         
-        // --- FORMATAÇÃO DE ENDEREÇO PROFISSIONAL ---
-        // Ex: "Rua das Flores, 123 (Apto 101) - Centro - São Paulo/SP"
+        // Formatação de Endereço
         StringBuilder endCompleto = new StringBuilder();
         endCompleto.append(viaCep.getLogradouro());
-        endCompleto.append(", ").append(data.getNumero()); // Número
+        endCompleto.append(", ").append(data.getNumero()); 
         
         if (data.getComplemento() != null && !data.getComplemento().isEmpty()) {
-            endCompleto.append(" (").append(data.getComplemento()).append(")"); // Complemento
+            endCompleto.append(" (").append(data.getComplemento()).append(")"); 
         }
         
         endCompleto.append(" - ").append(viaCep.getBairro());
         endCompleto.append(" - ").append(viaCep.getLocalidade()).append("/").append(viaCep.getUf());
-        // -------------------------------------------
 
         newUser.setEndereco(endCompleto.toString());
         newUser.setCep(data.getCep().replace("-", ""));

@@ -1,9 +1,9 @@
 package com.estoque.config;
 
-import com.estoque.model.Funcionario; // <--- NOVO IMPORT
+import com.estoque.model.Funcionario;
 import com.estoque.model.Produto;
 import com.estoque.model.Usuario;
-import com.estoque.repository.FuncionarioRepository; // <--- NOVO IMPORT
+import com.estoque.repository.FuncionarioRepository;
 import com.estoque.repository.ProdutoRepository;
 import com.estoque.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class DataSeeder implements CommandLineRunner {
     private ProdutoRepository produtoRepository;
     
     @Autowired
-    private FuncionarioRepository funcionarioRepository; // <--- INJETAR REPOSITÓRIO DE FUNCIONÁRIOS
+    private FuncionarioRepository funcionarioRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -31,31 +31,33 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         
-        // --- 1. SEED DE USUÁRIOS ---
+        // --- 1. SEED DE USUÁRIOS (COM TELEFONE) ---
         if (usuarioRepository.findByEmail("cliente@gmail.com") == null) {
             Usuario cliente = new Usuario();
             cliente.setNome("Cliente Padrão");
             cliente.setEmail("cliente@gmail.com");
+            cliente.setTelefone("(11) 99999-1010"); // <--- NOVO
             cliente.setCpf("111.111.111-11");
-            cliente.setEndereco("Rua dos Clientes, 100");
+            cliente.setEndereco("Rua dos Clientes, 100 - Centro");
             cliente.setCep("12345678");
             cliente.setAdmin(false);
             cliente.setSenha(passwordEncoder.encode("123456"));
             usuarioRepository.save(cliente);
-            System.out.println("✅ Usuário Cliente criado.");
+            System.out.println("✅ Usuário Cliente criado com telefone.");
         }
 
         if (usuarioRepository.findByEmail("admin@estoque.com") == null) {
             Usuario admin = new Usuario();
             admin.setNome("Administrador Master");
             admin.setEmail("admin@estoque.com");
+            admin.setTelefone("(11) 98888-2020"); // <--- NOVO
             admin.setCpf("000.000.000-00");
             admin.setEndereco("Centro de Distribuição");
             admin.setCep("87654321");
             admin.setAdmin(true);
             admin.setSenha(passwordEncoder.encode("123456"));
             usuarioRepository.save(admin);
-            System.out.println("✅ Usuário Admin criado.");
+            System.out.println("✅ Usuário Admin criado com telefone.");
         }
 
         // --- 2. SEED DE PRODUTOS ---
@@ -65,31 +67,27 @@ public class DataSeeder implements CommandLineRunner {
             p1.setDescricao("Notebook potente com RTX 3050 e 16GB RAM");
             p1.setPreco(4500.00);
             p1.setQuantidade(10); 
+            p1.setCategoria("Informática");
 
             Produto p2 = new Produto();
             p2.setNome("Mouse Sem Fio Logitech");
             p2.setDescricao("Mouse ergonômico silencioso");
             p2.setPreco(120.50);
             p2.setQuantidade(50);
+            p2.setCategoria("Acessórios");
 
             Produto p3 = new Produto();
             p3.setNome("Subwoofer Automotivo Pioneer");
             p3.setDescricao("Grave potente para instalação em carros");
             p3.setPreco(650.00);
             p3.setQuantidade(5);
+            p3.setCategoria("Automotivo");
 
-            Produto p4 = new Produto();
-            p4.setNome("Kit Som Ambiente JBL");
-            p4.setDescricao("4 caixas de som + amplificador");
-            p4.setPreco(1200.00);
-            p4.setQuantidade(3);
-
-            produtoRepository.saveAll(Arrays.asList(p1, p2, p3, p4));
+            produtoRepository.saveAll(Arrays.asList(p1, p2, p3));
             System.out.println("✅ Produtos de teste cadastrados!");
         }
 
         // --- 3. SEED DE FUNCIONÁRIOS (EQUIPE TÉCNICA) ---
-        // Cria apenas se a tabela estiver vazia
         if (funcionarioRepository.count() == 0) {
             Funcionario f1 = new Funcionario();
             f1.setNome("Carlos Técnico (Som)");
@@ -102,8 +100,6 @@ public class DataSeeder implements CommandLineRunner {
 
             funcionarioRepository.saveAll(Arrays.asList(f1, f2, f3));
             System.out.println("✅ Equipe técnica cadastrada com sucesso!");
-        } else {
-            System.out.println("ℹ️ Funcionários já existem no banco.");
         }
     }
 }

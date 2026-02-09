@@ -5,18 +5,20 @@ import { useNavigate, Link } from 'react-router-dom';
 export function Register() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [telefone, setTelefone] = useState(''); // <--- STATE NOVO
   const [password, setPassword] = useState('');
   const [documento, setDocumento] = useState('');
   const [cep, setCep] = useState('');
-  const [numero, setNumero] = useState('');           // Novo nome
-  const [complemento, setComplemento] = useState(''); // Novo campo
+  const [numero, setNumero] = useState('');           
+  const [complemento, setComplemento] = useState(''); 
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
-    if(!nome || !email || !password || !cep || !numero) {
+    // Validação básica inclui telefone agora
+    if(!nome || !email || !password || !cep || !numero || !telefone) {
       setError("Preencha os campos obrigatórios (*)");
       return;
     }
@@ -24,15 +26,15 @@ export function Register() {
     setLoading(true);
 
     try {
-      // Ajuste a URL se necessário (/api/auth/register ou /auth/register)
       await axios.post('http://localhost:8080/api/auth/register', {
         nome,
         email,
+        telefone, // <--- ENVIANDO
         password,
         documento,
         cep,
-        numero,        // Enviando separado
-        complemento    // Enviando separado
+        numero,        
+        complemento    
       });
 
       alert('Cadastro realizado com sucesso!');
@@ -62,9 +64,15 @@ export function Register() {
             <input type="text" className="form-control" value={nome} onChange={e => setNome(e.target.value)} />
           </div>
 
-          <div>
-            <label className="form-label fw-bold small">E-mail *</label>
-            <input type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} />
+          <div className="row g-2">
+            <div className="col-7">
+                <label className="form-label fw-bold small">E-mail *</label>
+                <input type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+            <div className="col-5">
+                <label className="form-label fw-bold small">Telefone/Cel *</label>
+                <input type="text" className="form-control" placeholder="(00) 00000-0000" value={telefone} onChange={e => setTelefone(e.target.value)} />
+            </div>
           </div>
 
           <div>
@@ -72,7 +80,6 @@ export function Register() {
             <input type="text" className="form-control" value={documento} onChange={e => setDocumento(e.target.value)} />
           </div>
 
-          {/* LINHA TRIPLA: CEP | NÚMERO | COMPLEMENTO */}
           <div className="row g-2">
             <div className="col-4">
               <label className="form-label fw-bold small">CEP *</label>

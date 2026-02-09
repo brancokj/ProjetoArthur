@@ -8,6 +8,7 @@ public class RegisterDTO {
     private String email;
     private String password;
     private String documento;
+    private String telefone; // <--- NOVO
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
@@ -29,4 +30,8 @@ public class RegisterDTO {
 
     public String getDocumento() { return documento; }
     public void setDocumento(String documento) { this.documento = documento; }
+
+    // Get e Set do Telefone
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
 }
