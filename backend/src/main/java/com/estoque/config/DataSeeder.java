@@ -1,8 +1,10 @@
 package com.estoque.config;
 
-import com.estoque.model.Produto; // Certifique-se que existe essa classe
+import com.estoque.model.Funcionario; // <--- NOVO IMPORT
+import com.estoque.model.Produto;
 import com.estoque.model.Usuario;
-import com.estoque.repository.ProdutoRepository; // Certifique-se que existe esse repositório
+import com.estoque.repository.FuncionarioRepository; // <--- NOVO IMPORT
+import com.estoque.repository.ProdutoRepository;
 import com.estoque.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -18,7 +20,10 @@ public class DataSeeder implements CommandLineRunner {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private ProdutoRepository produtoRepository; // <--- INJETAR REPOSITÓRIO DE PRODUTOS
+    private ProdutoRepository produtoRepository;
+    
+    @Autowired
+    private FuncionarioRepository funcionarioRepository; // <--- INJETAR REPOSITÓRIO DE FUNCIONÁRIOS
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -26,7 +31,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         
-        // --- 1. SEED DE USUÁRIOS (Mantenha o que já funcionava) ---
+        // --- 1. SEED DE USUÁRIOS ---
         if (usuarioRepository.findByEmail("cliente@gmail.com") == null) {
             Usuario cliente = new Usuario();
             cliente.setNome("Cliente Padrão");
@@ -53,16 +58,13 @@ public class DataSeeder implements CommandLineRunner {
             System.out.println("✅ Usuário Admin criado.");
         }
 
-        // --- 2. SEED DE PRODUTOS (NOVO!) ---
-        // Só cria se a tabela estiver vazia para não duplicar
+        // --- 2. SEED DE PRODUTOS ---
         if (produtoRepository.count() == 0) {
-            
             Produto p1 = new Produto();
             p1.setNome("Notebook Gamer Dell G15");
             p1.setDescricao("Notebook potente com RTX 3050 e 16GB RAM");
             p1.setPreco(4500.00);
-            p1.setQuantidade(10); // Estoque
-            // p1.setImagemUrl("https://exemplo.com/notebook.jpg"); // Se tiver campo imagem
+            p1.setQuantidade(10); 
 
             Produto p2 = new Produto();
             p2.setNome("Mouse Sem Fio Logitech");
@@ -71,29 +73,37 @@ public class DataSeeder implements CommandLineRunner {
             p2.setQuantidade(50);
 
             Produto p3 = new Produto();
-            p3.setNome("Monitor LG Ultrawide 29\"");
-            p3.setDescricao("Monitor Full HD ideal para multitarefas");
-            p3.setPreco(1200.00);
+            p3.setNome("Subwoofer Automotivo Pioneer");
+            p3.setDescricao("Grave potente para instalação em carros");
+            p3.setPreco(650.00);
             p3.setQuantidade(5);
 
             Produto p4 = new Produto();
-            p4.setNome("Teclado Mecânico RGB");
-            p4.setDescricao("Teclado switch blue com iluminação");
-            p4.setPreco(250.00);
-            p4.setQuantidade(20);
+            p4.setNome("Kit Som Ambiente JBL");
+            p4.setDescricao("4 caixas de som + amplificador");
+            p4.setPreco(1200.00);
+            p4.setQuantidade(3);
 
-            Produto p5 = new Produto();
-            p5.setNome("Cadeira Gamer ThunderX3");
-            p5.setDescricao("Cadeira confortável com ajuste de lombar");
-            p5.setPreco(1800.00);
-            p5.setQuantidade(8);
+            produtoRepository.saveAll(Arrays.asList(p1, p2, p3, p4));
+            System.out.println("✅ Produtos de teste cadastrados!");
+        }
 
-            // Salva todos de uma vez
-            produtoRepository.saveAll(Arrays.asList(p1, p2, p3, p4, p5));
+        // --- 3. SEED DE FUNCIONÁRIOS (EQUIPE TÉCNICA) ---
+        // Cria apenas se a tabela estiver vazia
+        if (funcionarioRepository.count() == 0) {
+            Funcionario f1 = new Funcionario();
+            f1.setNome("Carlos Técnico (Som)");
             
-            System.out.println("✅ 5 Produtos de teste cadastrados!");
+            Funcionario f2 = new Funcionario();
+            f2.setNome("Roberto Instalador");
+            
+            Funcionario f3 = new Funcionario();
+            f3.setNome("Fernanda Eletricista");
+
+            funcionarioRepository.saveAll(Arrays.asList(f1, f2, f3));
+            System.out.println("✅ Equipe técnica cadastrada com sucesso!");
         } else {
-            System.out.println("ℹ️ Produtos já existem no banco. Pulando criação.");
+            System.out.println("ℹ️ Funcionários já existem no banco.");
         }
     }
 }

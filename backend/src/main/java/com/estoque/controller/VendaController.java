@@ -93,4 +93,15 @@ public class VendaController {
         // O fetch = FetchType.EAGER na entidade Venda garante que os itens venham junto
         return ResponseEntity.ok(vendaRepository.findAll());
     }
+
+    @PutMapping("/{id}/atribuir-equipe")
+    public ResponseEntity<?> atribuirEquipe(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
+        String nomesEquipe = payload.get("equipe"); // O Front vai mandar um JSON: { "equipe": "João, Maria" }
+        
+        return vendaRepository.findById(id).map(venda -> {
+            venda.setVendedor(nomesEquipe);
+            vendaRepository.save(venda);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

@@ -94,12 +94,13 @@ public class Venda {
     }
 
     public void setItens(List<ItemVenda> listaItens) {
-        this.itens = listaItens;
-        // O Loop abaixo é CRUCIAL para o Cascade funcionar
-        if (listaItens != null) {
-            for (ItemVenda item : listaItens) {
-                item.setVenda(this);
-            }
+        if (listaItens == null) {
+            this.itens = new ArrayList<>();
+            return;
+        }
+        this.itens = listaItens; // Atribuição direta ou criar nova lista
+        for (ItemVenda item : this.itens) {
+            item.setVenda(this); // Garante o vínculo bidirecional
         }
     }
 }
