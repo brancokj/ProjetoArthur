@@ -19,7 +19,7 @@ public class Venda {
     private Double valorTotal;
 
     // --- CAMPOS EXTRAS ---
-    private String vendedor; 
+    private String vendedor;
     private String tipoAtendimento;
 
     // Relacionamento com Usuário (Cliente)
@@ -31,30 +31,61 @@ public class Venda {
     private List<ItemVenda> itens = new ArrayList<>();
 
     // Construtor vazio
-    public Venda() {}
+    public Venda() {
+    }
 
     // --- GETTERS E SETTERS ---
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsuarioNome() {
         return usuario != null ? usuario.getNome() : "Cliente Desconhecido";
     }
 
-    public LocalDateTime getDataVenda() { return dataVenda; }
-    public void setDataVenda(LocalDateTime dataVenda) { this.dataVenda = dataVenda; }
+    public LocalDateTime getDataVenda() {
+        return dataVenda;
+    }
 
-    public Double getValorTotal() { return valorTotal; }
-    public void setValorTotal(Double valorTotal) { this.valorTotal = valorTotal; }
+    public void setDataVenda(LocalDateTime dataVenda) {
+        this.dataVenda = dataVenda;
+    }
 
-    public String getVendedor() { return vendedor; }
-    public void setVendedor(String vendedor) { this.vendedor = vendedor; }
+    public Double getValorTotal() {
+        return valorTotal;
+    }
 
-    public String getTipoAtendimento() { return tipoAtendimento; }
-    public void setTipoAtendimento(String tipoAtendimento) { this.tipoAtendimento = tipoAtendimento; }
+    public void setValorTotal(Double valorTotal) {
+        this.valorTotal = valorTotal;
+    }
 
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public String getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(String vendedor) {
+        this.vendedor = vendedor;
+    }
+
+    public String getTipoAtendimento() {
+        return tipoAtendimento;
+    }
+
+    public void setTipoAtendimento(String tipoAtendimento) {
+        this.tipoAtendimento = tipoAtendimento;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
     // --- A CORREÇÃO ESTÁ AQUI ---
     // Antes estava getListaItemVendas(), agora é getItens()
@@ -63,14 +94,12 @@ public class Venda {
     }
 
     public void setItens(List<ItemVenda> listaItens) {
-        if (listaItens == null) {
-            this.itens = new ArrayList<>();
-            return;
-        }
-        this.itens = new ArrayList<>();
-        for (ItemVenda item : listaItens) {
-            item.setVenda(this); // Garante o vínculo do ID
-            this.itens.add(item);
+        this.itens = listaItens;
+        // O Loop abaixo é CRUCIAL para o Cascade funcionar
+        if (listaItens != null) {
+            for (ItemVenda item : listaItens) {
+                item.setVenda(this);
+            }
         }
     }
 }
