@@ -24,7 +24,7 @@ function Produtos() {
     const [qtdCompra, setQtdCompra] = useState(1);
 
     // Estados da Venda (Apenas Tipo)
-    const [tipoAtendimento, setTipoAtendimento] = useState('NA_LOJA'); 
+    const [tipoAtendimento, setTipoAtendimento] = useState<'NA_LOJA' | 'DOMICILIO'>('NA_LOJA'); 
 
     // --- 2. EFEITOS ---
     useEffect(() => {
@@ -102,21 +102,33 @@ function Produtos() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+            {/* --- NAVBAR --- */}
             <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm">
                 <Container>
                     <Navbar.Brand className="fw-bold">📦 Estoque Pro</Navbar.Brand>
-                    <Nav className="ms-auto">
+                    <Nav className="ms-auto gap-2">
+                        
+                        {/* BOTÃO PERFIL (NOVO) */}
+                        <Button variant="outline-info" size="sm" className="fw-bold" onClick={() => navigate('/perfil')}>
+                            👤 Meu Perfil
+                        </Button>
+
+                        {/* BOTÃO ADMIN (Só aparece se for admin) */}
                         {isAdmin && (
-                            <Button variant="warning" size="sm" className="me-2 fw-bold" onClick={() => navigate('/admin')}>
+                            <Button variant="warning" size="sm" className="fw-bold" onClick={() => navigate('/admin')}>
                                 🛡️ Painel Admin
                             </Button>
                         )}
-                        <Button variant="outline-light" size="sm" onClick={() => { localStorage.removeItem('token'); navigate('/'); }}>Sair</Button>
+                        
+                        {/* BOTÃO SAIR */}
+                        <Button variant="outline-light" size="sm" onClick={() => { localStorage.removeItem('token'); navigate('/'); }}>
+                            Sair
+                        </Button>
                     </Nav>
                 </Container>
             </Navbar>
 
-            {/* HERO */}
+            {/* --- HERO / BUSCA --- */}
             <div className="bg-primary text-white py-5 mb-5 shadow">
                 <Container>
                     <Row className="align-items-center">
@@ -126,7 +138,12 @@ function Produtos() {
                         </Col>
                         <Col md={6}>
                             <InputGroup size="lg">
-                                <Form.Control placeholder="🔍 Buscar..." value={busca} onChange={(e) => setBusca(e.target.value)} style={{ borderRadius: '30px 0 0 30px', border: 'none' }} />
+                                <Form.Control 
+                                    placeholder="🔍 Buscar..." 
+                                    value={busca} 
+                                    onChange={(e) => setBusca(e.target.value)} 
+                                    style={{ borderRadius: '30px 0 0 30px', border: 'none' }} 
+                                />
                                 <Button variant="light" style={{ borderRadius: '0 30px 30px 0' }}>Buscar</Button>
                             </InputGroup>
                         </Col>
@@ -134,7 +151,7 @@ function Produtos() {
                 </Container>
             </div>
 
-            {/* LISTA */}
+            {/* --- LISTA DE PRODUTOS --- */}
             <Container className="pb-5">
                 <Row>
                     {produtosFiltrados.map(produto => (
@@ -146,6 +163,8 @@ function Produtos() {
                                         <small className="text-muted">ID: #{produto.id}</small>
                                     </div>
                                     <Card.Title className="fw-bold fs-4 mb-3">{produto.nome}</Card.Title>
+                                    {/* <p className="text-muted small flex-grow-1">{produto.descricao}</p> */}
+                                    
                                     <div className="mt-auto pt-3 border-top">
                                         <div className="d-flex justify-content-between align-items-end">
                                             <div>
@@ -181,7 +200,14 @@ function Produtos() {
                                     <Form.Label className="fw-bold">Quantidade</Form.Label>
                                     <small className="text-muted">Max: {produtoSelecionado.quantidade}</small>
                                 </div>
-                                <Form.Control type="number" min="1" max={produtoSelecionado.quantidade} value={qtdCompra} onChange={(e) => setQtdCompra(parseInt(e.target.value))} size="lg" />
+                                <Form.Control 
+                                    type="number" 
+                                    min="1" 
+                                    max={produtoSelecionado.quantidade} 
+                                    value={qtdCompra} 
+                                    onChange={(e) => setQtdCompra(parseInt(e.target.value))} 
+                                    size="lg" 
+                                />
                             </Form.Group>
 
                             {/* Tipo de Atendimento */}
@@ -204,8 +230,8 @@ function Produtos() {
                                     </Button>
                                 </div>
                                 {tipoAtendimento === 'DOMICILIO' && (
-                                    <small className="text-info d-block text-center">
-                                        ℹ️ Nossa equipe entrará em contacto para confirmar o horário.
+                                    <small className="text-info d-block text-center bg-light p-2 rounded">
+                                        ℹ️ Nossa equipe técnica entrará em contacto para agendar o horário.
                                     </small>
                                 )}
                             </Form.Group>
