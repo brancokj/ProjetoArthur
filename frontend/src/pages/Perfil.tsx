@@ -13,10 +13,11 @@ export function Perfil() {
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [telefone, setTelefone] = useState('');
-    const [cpf, setCpf] = useState(''); // Será Read-Only
+    const [cpf, setCpf] = useState(''); 
     const [endereco, setEndereco] = useState('');
     const [cep, setCep] = useState('');
-    const [senha, setSenha] = useState(''); // Opcional para troca
+    const [senha, setSenha] = useState(''); 
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         carregarDados();
@@ -31,13 +32,16 @@ export function Perfil() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const u = res.data;
+            
+            // Preenche os campos com o que veio do Backend (agora incluindo CEP e Endereço)
             setId(u.id);
             setNome(u.nome || '');
             setEmail(u.email || '');
             setTelefone(u.telefone || '');
             setCpf(u.cpf || u.cnpj || '');
-            setEndereco(u.endereco || ''); // Se tiver endereço no DTO
-            setCep(u.cep || ''); // Se tiver CEP no DTO
+            setEndereco(u.endereco || ''); 
+            setCep(u.cep || '');
+            setIsAdmin(u.admin);
         } catch (error) {
             console.error(error);
             setMsg({ type: 'danger', text: 'Erro ao carregar perfil.' });
@@ -66,7 +70,7 @@ export function Perfil() {
             });
 
             setMsg({ type: 'success', text: 'Perfil atualizado com sucesso!' });
-            setSenha(''); // Limpa campo de senha
+            setSenha(''); 
         } catch (error) {
             setMsg({ type: 'danger', text: 'Erro ao atualizar. Tente novamente.' });
         } finally {
@@ -90,6 +94,14 @@ export function Perfil() {
                             <div className="text-center py-5"><Spinner animation="border" /></div>
                         ) : (
                             <Form>
+                                <div className="text-center mb-4">
+                                    <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style={{width: '60px', height: '60px', fontSize: '24px'}}>
+                                        {nome.charAt(0).toUpperCase()}
+                                    </div>
+                                    <h4 className="mt-2">{nome}</h4>
+                                    <span className="badge bg-secondary">{isAdmin ? 'ADMIN' : 'CLIENTE'}</span>
+                                </div>
+
                                 <h5 className="mb-3 text-primary border-bottom pb-2">Informações Pessoais</h5>
                                 <Row className="mb-3">
                                     <Col md={6}>
@@ -101,10 +113,10 @@ export function Perfil() {
                                         <Form.Control 
                                             type="text" 
                                             value={cpf} 
-                                            disabled // <--- IMPEDE A EDIÇÃO
+                                            disabled // <--- CPF BLOQUEADO
                                             style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
                                         />
-                                        <Form.Text className="text-muted">O documento não pode ser alterado.</Form.Text>
+                                        <Form.Text className="text-muted" style={{fontSize: '0.75rem'}}>O documento não pode ser alterado.</Form.Text>
                                     </Col>
                                 </Row>
 
@@ -119,7 +131,7 @@ export function Perfil() {
                                     </Col>
                                 </Row>
 
-                                <h5 className="mb-3 mt-4 text-primary border-bottom pb-2">Endereço</h5>
+                                <h5 className="mb-3 mt-4 text-primary border-bottom pb-2">Endereço de Entrega</h5>
                                 <Row className="mb-3">
                                     <Col md={4}>
                                         <Form.Label className="fw-bold">CEP</Form.Label>
@@ -147,6 +159,9 @@ export function Perfil() {
                                 <div className="d-grid gap-2">
                                     <Button variant="primary" size="lg" onClick={handleSalvar} disabled={loading}>
                                         {loading ? 'Salvando...' : '💾 Salvar Alterações'}
+                                    </Button>
+                                    <Button variant="outline-danger" className="mt-2" onClick={() => { localStorage.removeItem('token'); navigate('/'); }}>
+                                        Sair da Conta
                                     </Button>
                                 </div>
                             </Form>
