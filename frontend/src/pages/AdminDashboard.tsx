@@ -211,7 +211,7 @@ export function AdminDashboard() {
             <h3 className="fw-bold mb-4">📊 Vendas</h3>
             <Card className="mb-4 shadow-sm"><Card.Body><Row className="g-3 align-items-end"><Col md={3}><Form.Control type="date" value={dataInicio} onChange={e=>setDataInicio(e.target.value)}/></Col><Col md={3}><Form.Control type="date" value={dataFim} onChange={e=>setDataFim(e.target.value)}/></Col><Col md={3}><Form.Select value={filtroTipo} onChange={e=>setFiltroTipo(e.target.value)}><option value="TODOS">Todos</option><option value="NA_LOJA">🏪 Na Loja</option><option value="DOMICILIO">🚚 Domicílio</option></Form.Select></Col><Col md={3}><Button variant="outline-secondary" className="w-100" onClick={()=>{setDataInicio('');setDataFim('');setFiltroTipo('TODOS')}}>Limpar</Button></Col></Row></Card.Body></Card>
             
-            {/* --- AQUI ESTÃO OS 3 QUADRADOS DE VOLTA --- */}
+            {/* --- 3 QUADRADOS COM COR CORRIGIDA --- */}
             <Row className="mb-4 g-3">
                 <Col md={4}>
                     <Card className="bg-success text-white p-3 shadow-sm h-100 border-0">
@@ -222,7 +222,8 @@ export function AdminDashboard() {
                     </Card>
                 </Col>
                 <Col md={4}>
-                    <Card className="bg-warning p-3 shadow-sm h-100 border-0">
+                    {/* COR AMARELA MAIS CLARA AQUI (bg-opacity-50) */}
+                    <Card className="bg-warning bg-opacity-50 p-3 shadow-sm h-100 border-0">
                         <div className="d-flex justify-content-between align-items-center">
                             <div><h2 className="fw-bold mb-0 text-dark">{qtdLoja}</h2><small className="text-dark">Retirada na Loja</small></div>
                             <span className="fs-1">🏪</span>

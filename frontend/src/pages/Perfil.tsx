@@ -33,7 +33,6 @@ export function Perfil() {
             });
             const u = res.data;
             
-            // Preenche os campos com o que veio do Backend (agora incluindo CEP e Endereço)
             setId(u.id);
             setNome(u.nome || '');
             setEmail(u.email || '');
@@ -62,7 +61,7 @@ export function Perfil() {
                 telefone,
                 endereco,
                 cep,
-                senha: senha || undefined // Só envia se preencheu algo
+                senha: senha || undefined 
             };
 
             await axios.put(`http://localhost:8080/api/usuarios/${id}`, payload, {
@@ -78,15 +77,19 @@ export function Perfil() {
         }
     };
 
+    // CLASSE PARA BORDAS MAIS GROSSAS E VISÍVEIS
+    const inputClass = "border border-2 border-secondary shadow-sm fw-bold";
+
     return (
-        <div style={{ minHeight: '100vh', background: '#f0f2f5', paddingTop: '40px' }}>
+        <div style={{ minHeight: '100vh', background: '#f4f6f8', paddingTop: '40px' }}>
             <Container style={{ maxWidth: '800px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h2 className="fw-bold text-dark">👤 Meu Perfil</h2>
                     <Button variant="outline-dark" onClick={() => navigate('/produtos')}>Voltar para Loja</Button>
                 </div>
 
-                <Card className="shadow-sm border-0">
+                {/* ADICIONADO: bg-warning bg-opacity-10 para o fundo amarelo claro */}
+                <Card className="shadow border-0 bg-warning bg-opacity-10">
                     <Card.Body className="p-4">
                         {msg.text && <Alert variant={msg.type}>{msg.text}</Alert>}
 
@@ -95,72 +98,74 @@ export function Perfil() {
                         ) : (
                             <Form>
                                 <div className="text-center mb-4">
-                                    <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style={{width: '60px', height: '60px', fontSize: '24px'}}>
+                                    <div className="bg-white border border-3 border-warning rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style={{width: '70px', height: '70px', fontSize: '28px'}}>
                                         {nome.charAt(0).toUpperCase()}
                                     </div>
-                                    <h4 className="mt-2">{nome}</h4>
-                                    <span className="badge bg-secondary">{isAdmin ? 'ADMIN' : 'CLIENTE'}</span>
+                                    <h4 className="mt-2 fw-bold text-dark">{nome}</h4>
+                                    <span className="badge bg-dark">{isAdmin ? 'ADMINISTRADOR' : 'CLIENTE'}</span>
                                 </div>
 
-                                <h5 className="mb-3 text-primary border-bottom pb-2">Informações Pessoais</h5>
+                                <h5 className="mb-3 text-dark border-bottom border-secondary pb-2">Informações Pessoais</h5>
                                 <Row className="mb-3">
                                     <Col md={6}>
-                                        <Form.Label className="fw-bold">Nome Completo</Form.Label>
-                                        <Form.Control type="text" value={nome} onChange={e => setNome(e.target.value)} />
+                                        <Form.Label className="fw-bold text-dark">Nome Completo</Form.Label>
+                                        <Form.Control type="text" value={nome} onChange={e => setNome(e.target.value)} className={inputClass} />
                                     </Col>
                                     <Col md={6}>
-                                        <Form.Label className="fw-bold">CPF / Documento</Form.Label>
+                                        <Form.Label className="fw-bold text-dark">CPF / Documento</Form.Label>
                                         <Form.Control 
                                             type="text" 
                                             value={cpf} 
-                                            disabled // <--- CPF BLOQUEADO
+                                            disabled 
+                                            className="border border-2 border-secondary shadow-sm"
                                             style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
                                         />
-                                        <Form.Text className="text-muted" style={{fontSize: '0.75rem'}}>O documento não pode ser alterado.</Form.Text>
+                                        <Form.Text className="text-muted fw-bold" style={{fontSize: '0.75rem'}}>O documento não pode ser alterado.</Form.Text>
                                     </Col>
                                 </Row>
 
                                 <Row className="mb-3">
                                     <Col md={6}>
-                                        <Form.Label className="fw-bold">Email</Form.Label>
-                                        <Form.Control type="email" value={email} onChange={e => setEmail(e.target.value)} />
+                                        <Form.Label className="fw-bold text-dark">Email</Form.Label>
+                                        <Form.Control type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
                                     </Col>
                                     <Col md={6}>
-                                        <Form.Label className="fw-bold">Telefone / Celular</Form.Label>
-                                        <Form.Control type="text" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="(xx) xxxxx-xxxx" />
+                                        <Form.Label className="fw-bold text-dark">Telefone / Celular</Form.Label>
+                                        <Form.Control type="text" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="(xx) xxxxx-xxxx" className={inputClass} />
                                     </Col>
                                 </Row>
 
-                                <h5 className="mb-3 mt-4 text-primary border-bottom pb-2">Endereço de Entrega</h5>
+                                <h5 className="mb-3 mt-4 text-dark border-bottom border-secondary pb-2">Endereço de Entrega</h5>
                                 <Row className="mb-3">
                                     <Col md={4}>
-                                        <Form.Label className="fw-bold">CEP</Form.Label>
-                                        <Form.Control type="text" value={cep} onChange={e => setCep(e.target.value)} />
+                                        <Form.Label className="fw-bold text-dark">CEP</Form.Label>
+                                        <Form.Control type="text" value={cep} onChange={e => setCep(e.target.value)} className={inputClass} />
                                     </Col>
                                     <Col md={8}>
-                                        <Form.Label className="fw-bold">Endereço Completo</Form.Label>
-                                        <Form.Control type="text" value={endereco} onChange={e => setEndereco(e.target.value)} />
+                                        <Form.Label className="fw-bold text-dark">Endereço Completo</Form.Label>
+                                        <Form.Control type="text" value={endereco} onChange={e => setEndereco(e.target.value)} className={inputClass} />
                                     </Col>
                                 </Row>
 
-                                <h5 className="mb-3 mt-4 text-danger border-bottom pb-2">Segurança</h5>
+                                <h5 className="mb-3 mt-4 text-danger border-bottom border-danger pb-2">Segurança</h5>
                                 <Row className="mb-4">
                                     <Col md={6}>
-                                        <Form.Label className="fw-bold">Nova Senha</Form.Label>
+                                        <Form.Label className="fw-bold text-dark">Nova Senha</Form.Label>
                                         <Form.Control 
                                             type="password" 
                                             value={senha} 
                                             onChange={e => setSenha(e.target.value)} 
                                             placeholder="Deixe em branco para manter a atual" 
+                                            className={inputClass}
                                         />
                                     </Col>
                                 </Row>
 
                                 <div className="d-grid gap-2">
-                                    <Button variant="primary" size="lg" onClick={handleSalvar} disabled={loading}>
+                                    <Button variant="primary" size="lg" className="fw-bold shadow" onClick={handleSalvar} disabled={loading}>
                                         {loading ? 'Salvando...' : '💾 Salvar Alterações'}
                                     </Button>
-                                    <Button variant="outline-danger" className="mt-2" onClick={() => { localStorage.removeItem('token'); navigate('/'); }}>
+                                    <Button variant="outline-danger" className="mt-2 fw-bold" onClick={() => { localStorage.removeItem('token'); navigate('/'); }}>
                                         Sair da Conta
                                     </Button>
                                 </div>
